@@ -123,9 +123,9 @@ export const AppMainMenu: React.FC<{
       return;
     }
 
-    const elements = window.excalidrawAPI.getSceneElements();
-    const appState = window.excalidrawAPI.getAppState();
-    const files = window.excalidrawAPI.getFiles?.() || {};
+    const elements = window.excalidrawAPI?.getSceneElements?.() || [];
+const appState = window.excalidrawAPI?.getAppState?.() || {};
+const files = window.excalidrawAPI?.getFiles?.() || {};
 
     const payload = {
       company_id: companyId,
