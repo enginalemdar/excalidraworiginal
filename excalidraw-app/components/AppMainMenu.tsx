@@ -98,7 +98,7 @@ export const AppMainMenu: React.FC<{
       <MainMenu.DefaultItems.ChangeCanvasBackground />
 
       {/* UnitPlan Projeme Kaydet Butonu */}
-      <MainMenu.Item
+<MainMenu.Item
   onSelect={async () => {
     const companyId = new URLSearchParams(window.location.search).get("company");
     if (!companyId) {
@@ -116,7 +116,9 @@ export const AppMainMenu: React.FC<{
 
     const payload = {
       company_id: companyId,
-      elements: excalidrawData,
+      elements: JSON.stringify(excalidrawData.elements || []),
+      appState: JSON.stringify(excalidrawData.appState || {}),
+      files: JSON.stringify(excalidrawData.files || {}),
     };
 
     try {
@@ -129,7 +131,7 @@ export const AppMainMenu: React.FC<{
       });
 
       const result = await response.json();
-      const newDrawId = result.response.id;
+      const newDrawId = result?.response?.id;
 
       if (newDrawId) {
         const url = new URL(window.location.href);
