@@ -5,7 +5,7 @@ import type { Theme } from "@excalidraw/excalidraw/types";
 export const AppMainMenu: React.FC<{
   theme: Theme | "system";
   setTheme: (theme: Theme | "system") => void;
-}> = React.memo((props) => {
+}> = React.memo(({ theme, setTheme }) => {
   return (
     <MainMenu>
       <MainMenu.DefaultItems.LoadScene />
@@ -14,8 +14,8 @@ export const AppMainMenu: React.FC<{
       <MainMenu.Separator />
       <MainMenu.DefaultItems.ToggleTheme
         allowSystemTheme
-        theme={props.theme}
-        onSelect={props.setTheme}
+        theme={theme}
+        onSelect={setTheme}
       />
     </MainMenu>
   );
