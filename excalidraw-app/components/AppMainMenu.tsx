@@ -2,13 +2,11 @@ import {
   loginIcon,
   ExcalLogo,
   eyeIcon,
-  saveIcon,
 } from "@excalidraw/excalidraw/components/icons";
 import { MainMenu } from "@excalidraw/excalidraw/index";
 import React from "react";
 
 import { isDevEnv } from "@excalidraw/common";
-import type { Theme } from "@excalidraw/element/types";
 import { LanguageList } from "../app-language/LanguageList";
 import { isExcalidrawPlusSignedUser } from "../app_constants";
 import { saveDebugState } from "./DebugCanvas";
@@ -17,18 +15,17 @@ export const AppMainMenu: React.FC<{
   onCollabDialogOpen: () => any;
   isCollaborating: boolean;
   isCollabEnabled: boolean;
-  theme: Theme | "system";
-  setTheme: (theme: Theme | "system") => void;
+  theme: any;
+  setTheme: (theme: any) => void;
   refresh: () => void;
 }> = React.memo((props) => {
-  const handleUnitPlanSave = async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const company = urlParams.get("company");
+  const handleSaveToUnitPlan = async () => {
+    const companyId = new URLSearchParams(window.location.search).get("company");
+    const drawId = new URLSearchParams(window.location.search).get("draw");
 
-    // Excalidraw içeriğini almak için API erişimi gerekiyorsa, bu kısmı değiştir.
-    const payload = {
-      company_id: company,
-      data: "Dummy placeholder content", // Buraya gerçek JSON içeriği eklenecek.
+    const data = {
+      company_id: companyId,
+      content: "SOME_DRAWING_DATA", // TODO: Excalidraw içeriğini serialize et
     };
 
     try {
@@ -37,20 +34,23 @@ export const AppMainMenu: React.FC<{
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
-      const newDrawId = result.response?.id;
+      const newId = result?.response?._id;
 
-      if (newDrawId) {
-        urlParams.set("draw", newDrawId);
-        window.history.replaceState(null, "", `?${urlParams.toString()}`);
-        alert("UnitPlan Projene kaydedildi!");
+      if (newId) {
+        const params = new URLSearchParams(window.location.search);
+        params.set("draw", newId);
+        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+        alert("Çizim UnitPlan'a kaydedildi!");
+      } else {
+        alert("ID dönmedi!");
       }
     } catch (err) {
-      console.error("UnitPlan kaydetme hatası:", err);
-      alert("Kaydedilirken bir hata oluştu.");
+      alert("Kayıt sırasında hata oluştu.");
+      console.error(err);
     }
   };
 
@@ -71,22 +71,28 @@ export const AppMainMenu: React.FC<{
       <MainMenu.DefaultItems.Help />
       <MainMenu.DefaultItems.ClearCanvas />
       <MainMenu.Separator />
+
       <MainMenu.Item
-        icon={saveIcon}
-        onClick={handleUnitPlanSave}
-        className="highlighted"
+        onSelect={handleSaveToUnitPlan}
       >
         UnitPlan Projeme Kaydet
       </MainMenu.Item>
+
+      <MainMenu.ItemLink
+        href="https://app.unitplan.co"
+      >
+        app.unitplan.co/draw/(draw_id)
+      </MainMenu.ItemLink>
+
       <MainMenu.ItemLink
         icon={ExcalLogo}
         href={`${
           import.meta.env.VITE_APP_PLUS_LP
         }/plus?utm_source=excalidraw&utm_medium=app&utm_content=hamburger`}
-        className=""
       >
         Excalidraw+
       </MainMenu.ItemLink>
+
       <MainMenu.DefaultItems.Socials />
       <MainMenu.ItemLink
         icon={loginIcon}
@@ -97,6 +103,7 @@ export const AppMainMenu: React.FC<{
       >
         {isExcalidrawPlusSignedUser ? "Sign in" : "Sign up"}
       </MainMenu.ItemLink>
+
       {isDevEnv() && (
         <MainMenu.Item
           icon={eyeIcon}
