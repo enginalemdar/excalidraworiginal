@@ -112,26 +112,16 @@ export const AppMainMenu: React.FC<{
       return;
     }
 
-    const localData = localStorage.getItem("excalidraw");
-    const appStateRaw = localStorage.getItem("excalidraw-state");
-    const filesRaw = localStorage.getItem("excalidraw-files");
-
-    let parsedElements, parsedAppState, parsedFiles;
-    try {
-      parsedElements = localData ? JSON.parse(localData) : [];
-      parsedAppState = appStateRaw ? JSON.parse(appStateRaw) : {};
-      parsedFiles = filesRaw ? JSON.parse(filesRaw) : {};
-    } catch (e) {
-      alert("Veriler okunurken hata oluştu.");
-      return;
-    }
+    const elements = JSON.parse(localStorage.getItem("excalidraw") || "[]");
+    const appState = JSON.parse(localStorage.getItem("excalidraw-state") || "{}");
+    const files = JSON.parse(localStorage.getItem("excalidraw-files") || "{}");
 
     const payload = {
       company_id: companyId,
       name: name.trim(),
-      elements: parsedElements,
-      appstate: parsedAppState,
-      files: parsedFiles,
+      elements,
+      appstate: appState,
+      files,
     };
 
     try {
