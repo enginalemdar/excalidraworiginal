@@ -2502,13 +2502,16 @@ if (drawId) {
     const drawData = result.response;
 
     if (drawData && drawData.elements) {
+      // Bubble verisi zaten string
       localStorage.setItem("excalidraw", drawData.elements);
       localStorage.setItem("excalidraw-state", drawData.appstate || "{}");
       localStorage.setItem("excalidraw-files", drawData.files || "{}");
 
-      // reload edip sahneyi yükle
-      window.location.href =
-        window.location.origin + window.location.pathname + window.location.search;
+      // draw parametresini silip yeniden yönlendirme yap
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("draw");
+      window.location.replace(newUrl.toString());
+
       return;
     }
   } catch (error) {
