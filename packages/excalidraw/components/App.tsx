@@ -2486,41 +2486,36 @@ class App extends React.Component<AppProps, AppState> {
       }
     });
   }
+//buradan yapıştı
+  const searchParams = new URLSearchParams(window.location.search);
+const drawId = searchParams.get("draw");
 
-  public async componentDidMount() {
-    this.unmounted = false;
-    this.excalidrawContainerValue.container =
-      this.excalidrawContainerRef.current;
-
-    const drawId = new URLSearchParams(window.location.search).get("draw");
 if (drawId) {
-  try {
-    const response = await fetch(
-      `https://app.unitplan.co/version-test/api/1.1/obj/draws/${drawId}`
-    );
-    const result = await response.json();
-    const drawData = result.response;
+  fetch(`https://app.unitplan.co/version-test/api/1.1/obj/draws/${drawId}`)
+    .then((res) => res.json())
+    .then((result) => {
+      const data = result.response;
 
-    if (drawData && drawData.elements) {
-      localStorage.setItem("excalidraw", JSON.stringify(drawData.elements));
-      localStorage.setItem(
-        "excalidraw-state",
-        JSON.stringify(drawData.appState || {})
-      );
-      localStorage.setItem(
-        "excalidraw-files",
-        JSON.stringify(drawData.files || {})
-      );
+      const elements = JSON.parse(data.elements || "[]");
+      const appState = JSON.parse(data.appstate || "{}");
+      const files = JSON.parse(data.files || "{}");
 
-      // sayfa reload ile sahneyi yüklesin
-      window.location.href = window.location.origin + window.location.pathname + window.location.search;
-      return;
-    }
-  } catch (error) {
-    console.error("Çizim verisi yüklenirken hata:", error);
-  }
+      this.scene.replaceAllElements(elements);
+      this.setState({
+        ...this.state,
+        ...appState,
+        isLoading: false,
+      });
+
+      if (Object.keys(files).length > 0 && this.files) {
+        this.files.addFiles(files);
+      }
+    })
+    .catch((err) => {
+      console.error("Sahne yüklenirken hata:", err);
+    });
 }
-
+  //buraya kadar yapıştı
     if (isTestEnv() || isDevEnv()) {
       const setState = this.setState.bind(this);
       Object.defineProperties(window.h, {
