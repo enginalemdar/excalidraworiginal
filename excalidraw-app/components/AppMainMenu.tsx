@@ -113,21 +113,24 @@ export const AppMainMenu: React.FC<{
       return;
     }
 
-    const drawName = prompt("Kaydınıza bir isim verin:");
-    if (!drawName) {
-      alert("İsim girilmedi.");
+    const name = prompt("Bu çizime bir ad verin:");
+    if (!name) {
+      alert("Ad girmeden kayıt yapılamaz.");
       return;
     }
 
-    const elements = JSON.parse(localStorage.getItem("excalidraw") || "[]");
-    const appState = JSON.parse(localStorage.getItem("excalidraw-state") || "{}");
+    if (!window.excalidrawAPI) {
+      alert("Excalidraw API'ye ulaşılamadı.");
+      return;
+    }
 
-    // 🔥 Excalidraw API üzerinden files çekiyoruz
-    const files = window.excalidrawAPI?.getFiles?.() || {};
+    const elements = window.excalidrawAPI.getSceneElements();
+    const appState = window.excalidrawAPI.getAppState();
+    const files = window.excalidrawAPI.getFiles?.() || {};
 
     const payload = {
       company_id: companyId,
-      name: drawName,
+      name,
       elements: JSON.stringify(elements),
       appstate: JSON.stringify(appState),
       files: JSON.stringify(files),
@@ -143,7 +146,7 @@ export const AppMainMenu: React.FC<{
       });
 
       const result = await response.json();
-      const newDrawId = result.response.id;
+      const newDrawId = result?.response?._id;
 
       if (newDrawId) {
         const url = new URL(window.location.href);
@@ -151,11 +154,11 @@ export const AppMainMenu: React.FC<{
         window.history.replaceState({}, "", url.toString());
         alert("UnitPlan'a başarıyla kaydedildi!");
       } else {
-        alert("ID alınamadı.");
+        alert("Kayıt başarılı ama ID alınamadı.");
       }
     } catch (error) {
       console.error("Kayıt hatası:", error);
-      alert("UnitPlan'a kaydederken hata oluştu.");
+      alert("UnitPlan'a kaydederken bir hata oluştu.");
     }
   }}
 >
