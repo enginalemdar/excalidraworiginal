@@ -1,9 +1,3 @@
-declare global {
-  interface Window {
-    excalidrawAPI?: any;
-    };
-  }
-}
 import {
   loginIcon,
   ExcalLogo,
@@ -20,6 +14,19 @@ import { LanguageList } from "../app-language/LanguageList";
 import { isExcalidrawPlusSignedUser } from "../app_constants";
 
 import { saveDebugState } from "./DebugCanvas";
+
+// AppMainMenu.tsx'in en üstüne, importların üstüne değil ama altına
+export {};
+
+declare global {
+  interface Window {
+    excalidrawAPI?: {
+      getSceneElements: () => any[];
+      getAppState: () => any;
+      getFiles: () => Record<string, any>;
+    };
+  }
+}
 
 export const AppMainMenu: React.FC<{
   onCollabDialogOpen: () => any;
