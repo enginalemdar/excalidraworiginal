@@ -7,93 +7,54 @@ import { MainMenu } from "@excalidraw/excalidraw/index";
 import React from "react";
 
 import { isDevEnv } from "@excalidraw/common";
+
+import type { Theme } from "@excalidraw/element/types";
+
 import { LanguageList } from "../app-language/LanguageList";
 import { isExcalidrawPlusSignedUser } from "../app_constants";
+
 import { saveDebugState } from "./DebugCanvas";
 
 export const AppMainMenu: React.FC<{
   onCollabDialogOpen: () => any;
   isCollaborating: boolean;
   isCollabEnabled: boolean;
-  theme: any;
-  setTheme: (theme: any) => void;
+  theme: Theme | "system";
+  setTheme: (theme: Theme | "system") => void;
   refresh: () => void;
 }> = React.memo((props) => {
-  const handleSaveToUnitPlan = async () => {
-    const companyId = new URLSearchParams(window.location.search).get("company");
-    const drawId = new URLSearchParams(window.location.search).get("draw");
-
-    const data = {
-      company_id: companyId,
-      content: "SOME_DRAWING_DATA", // TODO: Excalidraw içeriğini serialize et
-    };
-
-    try {
-      const response = await fetch("https://app.unitplan.co/version-test/api/1.1/wf/draws", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      const newId = result?.response?._id;
-
-      if (newId) {
-        const params = new URLSearchParams(window.location.search);
-        params.set("draw", newId);
-        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-        alert("Çizim UnitPlan'a kaydedildi!");
-      } else {
-        alert("ID dönmedi!");
-      }
-    } catch (err) {
-      alert("Kayıt sırasında hata oluştu.");
-      console.error(err);
-    }
-  };
-
   return (
     <MainMenu>
       <MainMenu.DefaultItems.LoadScene />
       <MainMenu.DefaultItems.SaveToActiveFile />
       <MainMenu.DefaultItems.Export />
       <MainMenu.DefaultItems.SaveAsImage />
+
       {props.isCollabEnabled && (
         <MainMenu.DefaultItems.LiveCollaborationTrigger
           isCollaborating={props.isCollaborating}
           onSelect={() => props.onCollabDialogOpen()}
         />
       )}
+
       <MainMenu.DefaultItems.CommandPalette className="highlighted" />
       <MainMenu.DefaultItems.SearchMenu />
       <MainMenu.DefaultItems.Help />
       <MainMenu.DefaultItems.ClearCanvas />
       <MainMenu.Separator />
 
-      <MainMenu.Item
-        onSelect={handleSaveToUnitPlan}
-      >
-        UnitPlan Projeme Kaydet
-      </MainMenu.Item>
-
-      <MainMenu.ItemLink
-        href="https://app.unitplan.co"
-      >
-        app.unitplan.co/draw/(draw_id)
-      </MainMenu.ItemLink>
-
       <MainMenu.ItemLink
         icon={ExcalLogo}
         href={`${
           import.meta.env.VITE_APP_PLUS_LP
         }/plus?utm_source=excalidraw&utm_medium=app&utm_content=hamburger`}
+        className=""
       >
         Excalidraw+
       </MainMenu.ItemLink>
 
       <MainMenu.DefaultItems.Socials />
+
       <MainMenu.ItemLink
         icon={loginIcon}
         href={`${import.meta.env.VITE_APP_PLUS_APP}${
@@ -121,16 +82,75 @@ export const AppMainMenu: React.FC<{
           Visual Debug
         </MainMenu.Item>
       )}
+
       <MainMenu.Separator />
+
       <MainMenu.DefaultItems.ToggleTheme
         allowSystemTheme
         theme={props.theme}
         onSelect={props.setTheme}
       />
+
       <MainMenu.ItemCustom>
         <LanguageList style={{ width: "100%" }} />
       </MainMenu.ItemCustom>
+
       <MainMenu.DefaultItems.ChangeCanvasBackground />
+
+      {/* UnitPlan Projeme Kaydet Butonu */}
+      <MainMenu.Item
+        onSelect={async () => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const companyId = urlParams.get("company");
+
+          if (!companyId) {
+            alert("company_id parametresi eksik!");
+            return;
+          }
+
+          const scene = window.localStorage.getItem("excalidraw");
+          if (!scene) {
+            alert("Kaydedilecek sahne bulunamadı.");
+            return;
+          }
+
+          const parsedScene = JSON.parse(scene);
+
+          try {
+            const response = await fetch(
+              "https://app.unitplan.co/version-test/api/1.1/wf/draws",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  company_id: companyId,
+                  elements: parsedScene.elements,
+                  appState: parsedScene.appState,
+                  files: parsedScene.files,
+                }),
+              }
+            );
+
+            const result = await response.json();
+
+            if (result && result.response && result.response._id) {
+              const drawId = result.response._id;
+              const newUrl = new URL(window.location.href);
+              newUrl.searchParams.set("draw", drawId);
+              window.location.href = newUrl.toString();
+            } else {
+              alert("ID alınamadı.");
+            }
+          } catch (error) {
+            console.error("Kayıt sırasında hata oluştu:", error);
+            alert("Kayıt sırasında bir hata oluştu.");
+          }
+        }}
+      >
+        UnitPlan Projeme Kaydet
+      </MainMenu.Item>
     </MainMenu>
   );
 });
