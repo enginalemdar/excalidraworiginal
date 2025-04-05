@@ -106,15 +106,32 @@ export const AppMainMenu: React.FC<{
       return;
     }
 
-    const elements = JSON.parse(localStorage.getItem("excalidraw") || "[]");
-    const appState = JSON.parse(localStorage.getItem("excalidraw-state") || "{}");
-    const files = JSON.parse(localStorage.getItem("excalidraw-files") || "{}");
+    const name = prompt("Çiziminize bir ad verin:");
+    if (!name || name.trim() === "") {
+      alert("Lütfen geçerli bir ad girin.");
+      return;
+    }
+
+    const localData = localStorage.getItem("excalidraw");
+    const appStateRaw = localStorage.getItem("excalidraw-state");
+    const filesRaw = localStorage.getItem("excalidraw-files");
+
+    let parsedElements, parsedAppState, parsedFiles;
+    try {
+      parsedElements = localData ? JSON.parse(localData) : [];
+      parsedAppState = appStateRaw ? JSON.parse(appStateRaw) : {};
+      parsedFiles = filesRaw ? JSON.parse(filesRaw) : {};
+    } catch (e) {
+      alert("Veriler okunurken hata oluştu.");
+      return;
+    }
 
     const payload = {
       company_id: companyId,
-      elements: JSON.stringify(elements),
-      appState: JSON.stringify(appState),
-      files: JSON.stringify(files),
+      name: name.trim(),
+      elements: parsedElements,
+      appstate: parsedAppState,
+      files: parsedFiles,
     };
 
     try {
@@ -139,7 +156,7 @@ export const AppMainMenu: React.FC<{
       }
     } catch (error) {
       console.error("Kayıt hatası:", error);
-      alert("UnitPlan'a kaydederken hata oluştu.");
+      alert("UnitPlan'a kaydederken bir hata oluştu.");
     }
   }}
 >
