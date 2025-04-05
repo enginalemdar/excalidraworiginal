@@ -2,17 +2,15 @@ import {
   loginIcon,
   ExcalLogo,
   eyeIcon,
+  saveIcon,
 } from "@excalidraw/excalidraw/components/icons";
 import { MainMenu } from "@excalidraw/excalidraw/index";
 import React from "react";
 
 import { isDevEnv } from "@excalidraw/common";
-
 import type { Theme } from "@excalidraw/element/types";
-
 import { LanguageList } from "../app-language/LanguageList";
 import { isExcalidrawPlusSignedUser } from "../app_constants";
-
 import { saveDebugState } from "./DebugCanvas";
 
 export const AppMainMenu: React.FC<{
@@ -23,6 +21,39 @@ export const AppMainMenu: React.FC<{
   setTheme: (theme: Theme | "system") => void;
   refresh: () => void;
 }> = React.memo((props) => {
+  const handleUnitPlanSave = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const company = urlParams.get("company");
+
+    // Excalidraw içeriğini almak için API erişimi gerekiyorsa, bu kısmı değiştir.
+    const payload = {
+      company_id: company,
+      data: "Dummy placeholder content", // Buraya gerçek JSON içeriği eklenecek.
+    };
+
+    try {
+      const response = await fetch("https://app.unitplan.co/version-test/api/1.1/wf/draws", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      const newDrawId = result.response?.id;
+
+      if (newDrawId) {
+        urlParams.set("draw", newDrawId);
+        window.history.replaceState(null, "", `?${urlParams.toString()}`);
+        alert("UnitPlan Projene kaydedildi!");
+      }
+    } catch (err) {
+      console.error("UnitPlan kaydetme hatası:", err);
+      alert("Kaydedilirken bir hata oluştu.");
+    }
+  };
+
   return (
     <MainMenu>
       <MainMenu.DefaultItems.LoadScene />
@@ -40,6 +71,13 @@ export const AppMainMenu: React.FC<{
       <MainMenu.DefaultItems.Help />
       <MainMenu.DefaultItems.ClearCanvas />
       <MainMenu.Separator />
+      <MainMenu.Item
+        icon={saveIcon}
+        onClick={handleUnitPlanSave}
+        className="highlighted"
+      >
+        UnitPlan Projeme Kaydet
+      </MainMenu.Item>
       <MainMenu.ItemLink
         icon={ExcalLogo}
         href={`${
