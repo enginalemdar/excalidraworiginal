@@ -99,58 +99,54 @@ export const AppMainMenu: React.FC<{
 
       {/* UnitPlan Projeme Kaydet Butonu */}
       <MainMenu.Item
-        onSelect={async () => {
-          const urlParams = new URLSearchParams(window.location.search);
-          const companyId = urlParams.get("company");
+  onSelect={async () => {
+    const companyId = new URLSearchParams(window.location.search).get("company");
+    if (!companyId) {
+      alert("Company ID URL'de bulunamadı.");
+      return;
+    }
 
-          if (!companyId) {
-            alert("company_id parametresi eksik!");
-            return;
-          }
+    const excalidrawDataRaw = localStorage.getItem("excalidraw");
+    const excalidrawData = excalidrawDataRaw ? JSON.parse(excalidrawDataRaw) : null;
 
-          const scene = window.localStorage.getItem("excalidraw");
-          if (!scene) {
-            alert("Kaydedilecek sahne bulunamadı.");
-            return;
-          }
+    if (!excalidrawData) {
+      alert("Excalidraw sahnesi bulunamadı.");
+      return;
+    }
 
-          const parsedScene = JSON.parse(scene);
+    const payload = {
+      company_id: companyId,
+      elements: excalidrawData,
+    };
 
-          try {
-            const response = await fetch(
-              "https://app.unitplan.co/version-test/api/1.1/wf/draws",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  company_id: companyId,
-                  elements: parsedScene.elements,
-                  appState: parsedScene.appState,
-                  files: parsedScene.files,
-                }),
-              }
-            );
+    try {
+      const response = await fetch("https://app.unitplan.co/version-test/api/1.1/wf/draws", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-            const result = await response.json();
+      const result = await response.json();
+      const newDrawId = result.response.id;
 
-            if (result && result.response && result.response._id) {
-              const drawId = result.response._id;
-              const newUrl = new URL(window.location.href);
-              newUrl.searchParams.set("draw", drawId);
-              window.location.href = newUrl.toString();
-            } else {
-              alert("ID alınamadı.");
-            }
-          } catch (error) {
-            console.error("Kayıt sırasında hata oluştu:", error);
-            alert("Kayıt sırasında bir hata oluştu.");
-          }
-        }}
-      >
-        UnitPlan Projeme Kaydet
-      </MainMenu.Item>
+      if (newDrawId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("draw", newDrawId);
+        window.history.replaceState({}, "", url.toString());
+        alert("UnitPlan'a başarıyla kaydedildi!");
+      } else {
+        alert("ID alınamadı.");
+      }
+    } catch (error) {
+      console.error("Kayıt hatası:", error);
+      alert("UnitPlan'a kaydederken hata oluştu.");
+    }
+  }}
+>
+  UnitPlan Projeme Kaydet
+</MainMenu.Item>
     </MainMenu>
   );
 });
