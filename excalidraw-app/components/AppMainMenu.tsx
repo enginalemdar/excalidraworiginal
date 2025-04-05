@@ -106,19 +106,15 @@ export const AppMainMenu: React.FC<{
       return;
     }
 
-    const excalidrawDataRaw = localStorage.getItem("excalidraw");
-    const excalidrawData = excalidrawDataRaw ? JSON.parse(excalidrawDataRaw) : null;
-
-    if (!excalidrawData) {
-      alert("Excalidraw sahnesi bulunamadı.");
-      return;
-    }
+    const elements = JSON.parse(localStorage.getItem("excalidraw") || "[]");
+    const appState = JSON.parse(localStorage.getItem("excalidraw-state") || "{}");
+    const files = JSON.parse(localStorage.getItem("excalidraw-files") || "{}");
 
     const payload = {
       company_id: companyId,
-      elements: JSON.stringify(excalidrawData.elements || []),
-      appState: JSON.stringify(excalidrawData.appState || {}),
-      files: JSON.stringify(excalidrawData.files || {}),
+      elements: JSON.stringify(elements),
+      appState: JSON.stringify(appState),
+      files: JSON.stringify(files),
     };
 
     try {
