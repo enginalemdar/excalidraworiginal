@@ -1,7 +1,6 @@
 declare global {
   interface Window {
-    excalidrawAPI?: {
-      getFiles: () => any;
+    excalidrawAPI?: any;
     };
   }
 }
