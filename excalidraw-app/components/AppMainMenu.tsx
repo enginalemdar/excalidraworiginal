@@ -1,3 +1,10 @@
+declare global {
+  interface Window {
+    excalidrawAPI?: {
+      getFiles: () => any;
+    };
+  }
+}
 import {
   loginIcon,
   ExcalLogo,
