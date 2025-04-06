@@ -2517,6 +2517,9 @@ if (drawId) {
   } catch (error) {
     console.error("Çizim verisi yüklenirken hata:", error);
   }
+  window.excalidrawAPI = this.excalidrawRef?.current?.readyPromise
+  ? await this.excalidrawRef.current.readyPromise
+  : null;
 }
     if (isTestEnv() || isDevEnv()) {
       const setState = this.setState.bind(this);
