@@ -2488,39 +2488,43 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   public async componentDidMount() {
-    this.unmounted = false;
-    this.excalidrawContainerValue.container =
-      this.excalidrawContainerRef.current;
+  this.unmounted = false;
+  this.excalidrawContainerValue.container =
+    this.excalidrawContainerRef.current;
 
-    const drawId = new URLSearchParams(window.location.search).get("draw");
-if (drawId) {
-  try {
-    const response = await fetch(
-      `https://app.unitplan.co/version-test/api/1.1/obj/draws/${drawId}`
-    );
-    const result = await response.json();
-    const drawData = result.response;
+  const drawId = new URLSearchParams(window.location.search).get("draw");
+  if (drawId) {
+    try {
+      const response = await fetch(
+        `https://app.unitplan.co/version-test/api/1.1/obj/draws/${drawId}`
+      );
+      const result = await response.json();
+      const drawData = result.response;
 
-    if (drawData && drawData.elements) {
-      // Bubble verisi zaten string
-      localStorage.setItem("excalidraw", drawData.elements);
-      localStorage.setItem("excalidraw-state", drawData.appstate || "{}");
-      localStorage.setItem("excalidraw-files", drawData.files || "{}");
+      if (drawData && drawData.elements) {
+        localStorage.setItem("excalidraw", drawData.elements);
+        localStorage.setItem("excalidraw-state", drawData.appstate || "{}");
+        localStorage.setItem("excalidraw-files", drawData.files || "{}");
 
-      // draw parametresini silip yeniden yönlendirme yap
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("draw");
-      window.location.replace(newUrl.toString());
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("draw");
+        window.location.replace(newUrl.toString());
 
-      return;
+        return;
+      }
+    } catch (error) {
+      console.error("Çizim verisi yüklenirken hata:", error);
     }
-  } catch (error) {
-    console.error("Çizim verisi yüklenirken hata:", error);
   }
+
+  // ✅ Her durumda API hazır olsun
   window.excalidrawAPI = this.excalidrawRef?.current?.readyPromise
-  ? await this.excalidrawRef.current.readyPromise
-  : null;
+    ? await this.excalidrawRef.current.readyPromise
+    : null;
+
+  // ...diğer componentDidMount kodları burada devam eder
 }
+
     if (isTestEnv() || isDevEnv()) {
       const setState = this.setState.bind(this);
       Object.defineProperties(window.h, {
