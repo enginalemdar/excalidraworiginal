@@ -2523,7 +2523,7 @@ class App extends React.Component<AppProps, AppState> {
     : null;
 
   window.excalidrawAPI = api;
-}
+    
     if (isTestEnv() || isDevEnv()) {
       const setState = this.setState.bind(this);
       Object.defineProperties(window.h, {
