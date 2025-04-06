@@ -2492,11 +2492,6 @@ class App extends React.Component<AppProps, AppState> {
   this.excalidrawContainerValue.container =
     this.excalidrawContainerRef.current;
 
-  // ✅ Excalidraw API'yi her durumda hazır hale getir
-  window.excalidrawAPI = this.excalidrawRef?.current?.readyPromise
-    ? await this.excalidrawRef.current.readyPromise
-    : null;
-
   const drawId = new URLSearchParams(window.location.search).get("draw");
   if (drawId) {
     try {
@@ -2521,6 +2516,13 @@ class App extends React.Component<AppProps, AppState> {
       console.error("Çizim verisi yüklenirken hata:", error);
     }
   }
+
+  // ✅ Excalidraw API'yi tanımla
+  const api = this.excalidrawRef?.current?.readyPromise
+    ? await this.excalidrawRef.current.readyPromise
+    : null;
+
+  window.excalidrawAPI = api;
 }
     if (isTestEnv() || isDevEnv()) {
       const setState = this.setState.bind(this);
