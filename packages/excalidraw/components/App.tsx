@@ -623,6 +623,8 @@ class App extends React.Component<AppProps, AppState> {
   unmounted: boolean = false;
   actionManager: ActionManager;
   device: Device = deviceContextInitialValue;
+  
+private excalidrawRef = React.createRef<ExcalidrawImperativeAPI>();
 
   private excalidrawContainerRef = React.createRef<HTMLDivElement>();
 
