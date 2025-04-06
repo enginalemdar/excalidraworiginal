@@ -16,8 +16,6 @@ import { isExcalidrawPlusSignedUser } from "../app_constants";
 import { saveDebugState } from "./DebugCanvas";
 
 // AppMainMenu.tsx'in en üstüne, importların üstüne değil ama altına
-export {};
-
 declare global {
   interface Window {
     excalidrawAPI?: {
